@@ -324,6 +324,14 @@ config TARGET_MX6UL_ENGICAM
 	select SPL_SEPARATE_BSS if SPL
 	select SPL_PINCTRL if SPL
 
+config TARGET_MX6UL_SWIFTCORE_EVK
+	bool "mx6ul_swiftcore_evk"
+	select BOARD_LATE_INIT
+	select MX6UL
+	select DM
+	select DM_THERMAL
+	select SUPPORT_SPL
+
 config TARGET_MX6ULL_14X14_EVK
 	bool "Support mx6ull_14x14_evk"
 	select BOARD_LATE_INIT
@@ -489,6 +497,7 @@ source "board/logicpd/imx6/Kconfig"
 source "board/seco/Kconfig"
 source "board/sks-kinkel/sksimx6/Kconfig"
 source "board/solidrun/mx6cuboxi/Kconfig"
+source "board/swiftlabs/mx6ul_swiftcore_evk/Kconfig"
 source "board/technexion/pico-imx6ul/Kconfig"
 source "board/tbs/tbs2910/Kconfig"
 source "board/tqc/tqma6/Kconfig"
