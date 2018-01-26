@@ -45,6 +45,7 @@
 #define CONFIG_SYS_I2C_MXC
 #define CONFIG_SYS_I2C_MXC_I2C1   /* enable I2C bus 1 */
 #define CONFIG_SYS_I2C_MXC_I2C2   /* enable I2C bus 2 */
+#define CONFIG_SYS_I2C_MXC_I2C3   /* enable I2C bus 3 */
 #define CONFIG_SYS_I2C_SPEED    100000
 
 /* PMIC only for 9X9 EVK */
@@ -192,6 +193,7 @@
 #endif
 
 /* USB Configs */
+#define CONFIG_CMD_USB
 #ifdef CONFIG_CMD_USB
 #define CONFIG_EHCI_HCD_INIT_AFTER_RESET
 #define CONFIG_MXC_USB_PORTSC  (PORT_PTS_UTMI | PORT_PTS_PTW)
@@ -200,9 +202,11 @@
 #endif
 
 #ifdef CONFIG_CMD_NET
+#define CONFIG_USB_HOST_ETHER
+#define CONFIG_USB_ETHER_ASIX
 #define CONFIG_FEC_MXC
 #define CONFIG_MII
-#define CONFIG_FEC_ENET_DEV   1
+#define CONFIG_FEC_ENET_DEV   0
 
 #if (CONFIG_FEC_ENET_DEV == 0)
 #define IMX_FEC_BASE      ENET_BASE_ADDR
