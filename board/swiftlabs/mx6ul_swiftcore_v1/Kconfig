@@ -1,0 +1,12 @@
+if TARGET_MX6UL_SWIFTCORE_V1
+
+config SYS_BOARD
+	default "mx6ul_swiftcore_v1"
+
+config SYS_VENDOR
+	default "swiftlabs"
+
+config SYS_CONFIG_NAME
+	default "mx6ul_swiftcore_v1"
+
+endif

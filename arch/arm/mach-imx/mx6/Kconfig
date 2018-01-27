@@ -307,6 +307,14 @@ config TARGET_MX6UL_14X14_EVK
 	select DM_THERMAL
 	select SUPPORT_SPL
 
+config TARGET_MX6UL_SWIFTCORE_V1
+	select BOARD_LATE_INIT
+	bool "mx6ul_swiftcore_v1"
+	select MX6UL
+	select DM
+	select DM_THERMAL
+	select SUPPORT_SPL
+
 config TARGET_MX6UL_ENGICAM
 	bool "Support Engicam GEAM6UL/Is.IoT"
 	select BOARD_LATE_INIT
@@ -498,6 +506,7 @@ source "board/seco/Kconfig"
 source "board/sks-kinkel/sksimx6/Kconfig"
 source "board/solidrun/mx6cuboxi/Kconfig"
 source "board/swiftlabs/mx6ul_swiftcore_evk/Kconfig"
+source "board/swiftlabs/mx6ul_swiftcore_v1/Kconfig"
 source "board/technexion/pico-imx6ul/Kconfig"
 source "board/tbs/tbs2910/Kconfig"
 source "board/tqc/tqma6/Kconfig"
