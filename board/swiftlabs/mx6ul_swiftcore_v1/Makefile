@@ -1,4 +1,4 @@
-# (C) Copyright 2015 Freescale Semiconductor, Inc.
+# (C) Copyright 2018 Swift Labs Inc.
 #
 # SPDX-License-Identifier:	GPL-2.0+
 #

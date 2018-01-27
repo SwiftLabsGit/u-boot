@@ -24,8 +24,6 @@
 #include <mmc.h>
 #include <netdev.h>
 #include <power/pmic.h>
-#include <power/pfuze3000_pmic.h>
-#include "../../freescale/common/pfuze.h"
 #include <usb.h>
 #include <usb/ehci-ci.h>
 
@@ -168,14 +166,6 @@ static struct i2c_pads_info i2c_pad_info1 = {
 		.gp = IMX_GPIO_NR(1, 29),
 	},
 };
-
-#ifdef CONFIG_POWER
-#define I2C_PMIC       0
-int power_init_board(void)
-{
-	return 0;
-}
-#endif
 #endif
 
 int dram_init(void)

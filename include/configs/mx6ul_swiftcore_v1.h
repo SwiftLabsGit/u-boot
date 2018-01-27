@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2015 Freescale Semiconductor, Inc.
+ * Copyright (C) 2018 Swift Labs Inc.
  *
- * Configuration settings for the Freescale i.MX6UL 14x14 EVK board.
+ * Configuration settings for the Swiftcore V1 Board
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -12,8 +12,6 @@
 #include <linux/sizes.h>
 #include "mx6_common.h"
 #include <asm/mach-imx/gpio.h>
-
-#define is_mx6ul_9x9_evk()	CONFIG_IS_ENABLED(TARGET_MX6UL_9X9_EVK)
 
 /* SPL options */
 #include "imx6_spl.h"
@@ -47,101 +45,88 @@
 #define CONFIG_SYS_I2C_MXC_I2C2		/* enable I2C bus 2 */
 #define CONFIG_SYS_I2C_MXC_I2C3		/* enable I2C bus 3 */
 #define CONFIG_SYS_I2C_SPEED		100000
-
-/* PMIC only for 9X9 EVK */
-#define CONFIG_POWER
-#define CONFIG_POWER_I2C
-#define CONFIG_POWER_PFUZE3000
-#define CONFIG_POWER_PFUZE3000_I2C_ADDR  0x08
 #endif
 
 #define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"script=boot.scr\0" \
-	"image=zImage\0" \
-	"console=ttymxc0\0" \
-	"fdt_high=0xffffffff\0" \
-	"initrd_high=0xffffffff\0" \
-	"fdt_file=undefined\0" \
-	"fdt_addr=0x83000000\0" \
-	"boot_fdt=try\0" \
-	"ip_dyn=yes\0" \
-	"videomode=video=ctfb:x:480,y:272,depth:24,pclk:108695,le:8,ri:4,up:2,lo:4,hs:41,vs:10,sync:0,vmode:0\0" \
-	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
-	"mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" \
-	"mmcroot=" CONFIG_MMCROOT " rootwait rw\0" \
-	"mmcautodetect=yes\0" \
-	"mmcargs=setenv bootargs console=${console},${baudrate} " \
-		"root=${mmcroot}\0" \
-	"loadbootscript=" \
-		"fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" \
-	"bootscript=echo Running bootscript from mmc ...; " \
-		"source\0" \
-	"loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" \
-	"loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
-	"mmcboot=echo Booting from mmc ...; " \
-		"run mmcargs; " \
-		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
-			"if run loadfdt; then " \
-				"bootz ${loadaddr} - ${fdt_addr}; " \
-			"else " \
-				"if test ${boot_fdt} = try; then " \
-					"bootz; " \
-				"else " \
-					"echo WARN: Cannot load the DT; " \
-				"fi; " \
-			"fi; " \
-		"else " \
-			"bootz; " \
-		"fi;\0" \
-	"netargs=setenv bootargs console=${console},${baudrate} " \
-		"root=/dev/nfs " \
-	"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
-		"netboot=echo Booting from net ...; " \
-		"run netargs; " \
-		"if test ${ip_dyn} = yes; then " \
-			"setenv get_cmd dhcp; " \
-		"else " \
-			"setenv get_cmd tftp; " \
-		"fi; " \
-		"${get_cmd} ${image}; " \
-		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
-			"if ${get_cmd} ${fdt_addr} ${fdt_file}; then " \
-				"bootz ${loadaddr} - ${fdt_addr}; " \
-			"else " \
-				"if test ${boot_fdt} = try; then " \
-					"bootz; " \
-				"else " \
-					"echo WARN: Cannot load the DT; " \
-				"fi; " \
-			"fi; " \
-		"else " \
-			"bootz; " \
-		"fi;\0" \
-		"findfdt="\
-			"if test $fdt_file = undefined; then " \
-				"if test $board_name = EVK && test $board_rev = 9X9; then " \
-					"setenv fdt_file imx6ul-9x9-evk.dtb; fi; " \
-				"if test $board_name = EVK && test $board_rev = 14X14; then " \
-					"setenv fdt_file imx6ul-14x14-evk.dtb; fi; " \
-				"if test $fdt_file = undefined; then " \
-					"echo WARNING: Could not determine dtb to use; fi; " \
-			"fi;\0" \
+  "username=dan\0" \
+  "set_paths= run clear_paths; setenv bootfile ${username}/${bootfile}; setenv fdt_file ${username}/${fdt_file}; setenv nfsroot /nfs/${username}/rootfs;\0" \
+  "clear_paths= setenv bootfile zImage; setenv fdt_file imx6ul-swiftcore-v1-evk.dtb;\0" \
+  "ethact=asx0\0" \
+  "serverip=192.168.0.199\0" \
+  "powercmd=i2c dev 2; i2c mw 0x08 0x70 0x10\0" \
+  "autoload=no\0" \
+  "bootfile=zImage\0" \
+  "fdt_file=imx6ul-swiftcore-v1-evk.dtb\0" \
+  "nfsroot=/nfs/rootfs\0" \
+  "script=boot.scr\0" \
+  "image=zImage\0" \
+  "console=ttymxc1\0" \
+  "fdt_high=0xffffffff\0" \
+  "initrd_high=0xffffffff\0" \
+  "fdt_addr=0x83000000\0" \
+  "boot_fdt=try\0" \
+  "ip_dyn=yes\0" \
+  "mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
+  "mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" \
+  "mmcroot=" CONFIG_MMCROOT " rootwait rw\0" \
+  "mmcautodetect=yes\0" \
+  "mmcargs=setenv bootargs console=${console},${baudrate} " \
+    "root=${mmcroot}\0" \
+  "loadbootscript=" \
+    "fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" \
+  "bootscript=echo Running bootscript from mmc ...; " \
+    "source\0" \
+  "loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" \
+  "loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
+  "nfsboot=run netargs; bootz $loadaddr - $fdt_addr\0" \
+  "sdboot=echo Booting from mmc ...; mmc dev ${mmcdev}; "\
+    "if mmc rescan; then "\
+      "if run loadimage; then "\
+        "run mmcboot; "\
+      "else "\
+        "echo ERROR: Cannot run loadimage; "\
+      "fi; "\
+    "else "\
+      "echo ERROR: Cannot run mmc rescan; "\
+    "fi;\0"\
+  "mmcboot=echo Booting from mmc ...; " \
+    "run mmcargs; " \
+    "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
+      "if run loadfdt; then " \
+        "bootz ${loadaddr} - ${fdt_addr}; " \
+      "else " \
+        "if test ${boot_fdt} = try; then " \
+          "bootz; " \
+        "else " \
+          "echo WARN: Cannot load the DT; " \
+        "fi; " \
+      "fi; " \
+    "else " \
+      "bootz; " \
+    "fi;\0" \
+  "netargs=setenv bootargs console=${console},${baudrate} " \
+    "rw " \
+    "root=/dev/mmcblk1p2 " \
+    "ip=dhcp " \
+    "nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
+  "netargs=setenv bootargs console=${console},${baudrate} " \
+    "root=/dev/nfs " \
+  "ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
 
 #define CONFIG_BOOTCOMMAND \
-	   "run findfdt;" \
-	   "mmc dev ${mmcdev};" \
-	   "mmc dev ${mmcdev}; if mmc rescan; then " \
-		   "if run loadbootscript; then " \
-			   "run bootscript; " \
-		   "else " \
-			   "if run loadimage; then " \
-				   "run mmcboot; " \
-			   "else run netboot; " \
-			   "fi; " \
-		   "fi; " \
-	   "else run netboot; fi"
+  "echo Configuring PMIC...; run powercmd; "\
+  "echo Configuring file paths for username: $username; "\
+  "run set_paths; "\
+  "echo Booting from network ...; usb start; setenv ethact asx0; "\
+  "if dhcp && tftp $loadaddr $bootfile && tftp $fdt_addr $fdt_file; "\
+    "then run nfsboot; "\
+  "else "\
+    "echo WARN: Issue with TFTP.; "\
+    "run clear_paths; "\
+    "run sdboot; "\
+  "fi;"
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_MEMTEST_START	0x80000000
