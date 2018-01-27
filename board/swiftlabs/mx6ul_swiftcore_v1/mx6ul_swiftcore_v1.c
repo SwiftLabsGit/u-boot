@@ -173,41 +173,6 @@ static struct i2c_pads_info i2c_pad_info1 = {
 #define I2C_PMIC       0
 int power_init_board(void)
 {
-	if (is_mx6ul_9x9_evk()) {
-		struct pmic *pfuze;
-		int ret;
-		unsigned int reg, rev_id;
-
-		ret = power_pfuze3000_init(I2C_PMIC);
-		if (ret)
-			return ret;
-
-		pfuze = pmic_get("PFUZE3000");
-		ret = pmic_probe(pfuze);
-		if (ret)
-			return ret;
-
-		pmic_reg_read(pfuze, PFUZE3000_DEVICEID, &reg);
-		pmic_reg_read(pfuze, PFUZE3000_REVID, &rev_id);
-		printf("PMIC: PFUZE3000 DEV_ID=0x%x REV_ID=0x%x\n",
-		       reg, rev_id);
-
-		/* disable Low Power Mode during standby mode */
-		pmic_reg_write(pfuze, PFUZE3000_LDOGCTL, 0x1);
-
-		/* SW1B step ramp up time from 2us to 4us/25mV */
-		reg = 0x40;
-		pmic_reg_write(pfuze, PFUZE3000_SW1BCONF, reg);
-
-		/* SW1B mode to APS/PFM */
-		reg = 0xc;
-		pmic_reg_write(pfuze, PFUZE3000_SW1BMODE, reg);
-
-		/* SW1B standby voltage set to 0.975V */
-		reg = 0xb;
-		pmic_reg_write(pfuze, PFUZE3000_SW1BSTBY, reg);
-	}
-
 	return 0;
 }
 #endif
@@ -243,31 +208,6 @@ static iomux_v3_cfg_t const usdhc1_pads[] = {
 };
 #endif
 
-/*
- * mx6ul_14x14_evk board default supports sd card. If want to use
- * EMMC, need to do board rework for sd2.
- * Introduce CONFIG_MX6UL_14X14_EVK_EMMC_REWORK, if sd2 reworked to support
- * emmc, need to define this macro.
- */
-#if defined(CONFIG_MX6UL_14X14_EVK_EMMC_REWORK)
-static iomux_v3_cfg_t const usdhc2_emmc_pads[] = {
-	MX6_PAD_NAND_RE_B__USDHC2_CLK | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_WE_B__USDHC2_CMD | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_DATA00__USDHC2_DATA0 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_DATA01__USDHC2_DATA1 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_DATA02__USDHC2_DATA2 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_DATA03__USDHC2_DATA3 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_DATA04__USDHC2_DATA4 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_DATA05__USDHC2_DATA5 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_DATA06__USDHC2_DATA6 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_NAND_DATA07__USDHC2_DATA7 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-
-	/*
-	 * RST_B
-	 */
-	MX6_PAD_NAND_ALE__GPIO4_IO10 | MUX_PAD_CTRL(NO_PAD_CTRL),
-};
-#else
 static iomux_v3_cfg_t const usdhc2_pads[] = {
 	MX6_PAD_NAND_RE_B__USDHC2_CLK | MUX_PAD_CTRL(USDHC_PAD_CTRL),
 	MX6_PAD_NAND_WE_B__USDHC2_CMD | MUX_PAD_CTRL(USDHC_PAD_CTRL),
@@ -287,7 +227,6 @@ static iomux_v3_cfg_t const usdhc2_cd_pad =
 static iomux_v3_cfg_t const usdhc2_dat3_pad =
 	MX6_PAD_NAND_DATA03__USDHC2_DATA3 |
 	MUX_PAD_CTRL(USDHC_DAT3_CD_PAD_CTRL);
-#endif
 
 static void setup_iomux_uart(void)
 {
@@ -324,11 +263,7 @@ static int board_qspi_init(void)
 #ifdef CONFIG_FSL_ESDHC
 static struct fsl_esdhc_cfg usdhc_cfg[2] = {
 	{USDHC1_BASE_ADDR, 0, 4},
-#if defined(CONFIG_MX6UL_14X14_EVK_EMMC_REWORK)
-	{USDHC2_BASE_ADDR, 0, 8},
-#else
 	{USDHC2_BASE_ADDR, 0, 4},
-#endif
 };
 
 #define USDHC1_CD_GPIO	IMX_GPIO_NR(1, 19)
@@ -346,9 +281,6 @@ int board_mmc_getcd(struct mmc *mmc)
 		ret = !gpio_get_value(USDHC1_CD_GPIO);
 		break;
 	case USDHC2_BASE_ADDR:
-#if defined(CONFIG_MX6UL_14X14_EVK_EMMC_REWORK)
-		ret = 1;
-#else
 		imx_iomux_v3_setup_pad(usdhc2_cd_pad);
 		gpio_direction_input(USDHC2_CD_GPIO);
 
@@ -359,7 +291,6 @@ int board_mmc_getcd(struct mmc *mmc)
 		ret = gpio_get_value(USDHC2_CD_GPIO);
 
 		imx_iomux_v3_setup_pad(usdhc2_dat3_pad);
-#endif
 		break;
 	}
 
@@ -369,12 +300,7 @@ int board_mmc_getcd(struct mmc *mmc)
 int board_mmc_init(bd_t *bis)
 {
 #ifdef CONFIG_SPL_BUILD
-#if defined(CONFIG_MX6UL_14X14_EVK_EMMC_REWORK)
-	imx_iomux_v3_setup_multiple_pads(usdhc2_emmc_pads,
-					 ARRAY_SIZE(usdhc2_emmc_pads));
-#else
 	imx_iomux_v3_setup_multiple_pads(usdhc2_pads, ARRAY_SIZE(usdhc2_pads));
-#endif
 	gpio_direction_output(USDHC2_PWR_GPIO, 0);
 	udelay(500);
 	gpio_direction_output(USDHC2_PWR_GPIO, 1);
@@ -402,13 +328,8 @@ int board_mmc_init(bd_t *bis)
 			gpio_direction_output(USDHC1_PWR_GPIO, 1);
 			break;
 		case 1:
-#if defined(CONFIG_MX6UL_14X14_EVK_EMMC_REWORK)
-			imx_iomux_v3_setup_multiple_pads(
-				usdhc2_emmc_pads, ARRAY_SIZE(usdhc2_emmc_pads));
-#else
 			imx_iomux_v3_setup_multiple_pads(
 				usdhc2_pads, ARRAY_SIZE(usdhc2_pads));
-#endif
 			gpio_direction_output(USDHC2_PWR_GPIO, 0);
 			udelay(500);
 			gpio_direction_output(USDHC2_PWR_GPIO, 1);
@@ -675,11 +596,7 @@ int board_late_init(void)
 
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 	env_set("board_name", "Swiftcore");
-
-	if (is_mx6ul_9x9_evk())
-		env_set("board_rev", "9X9");
-	else
-		env_set("board_rev", "V1");
+	env_set("board_rev", "V1");
 #endif
 
 	return 0;
@@ -687,11 +604,7 @@ int board_late_init(void)
 
 int checkboard(void)
 {
-	if (is_mx6ul_9x9_evk())
-		puts("Board: MX6UL 9x9 EVK\n");
-	else
-		puts("Board: MX6UL SWIFTCORE V1\n");
-
+	puts("Board: MX6UL SWIFTCORE V1\n");
 	return 0;
 }
 
@@ -709,68 +622,9 @@ static struct mx6ul_iomux_grp_regs mx6_grp_ioregs = {
 	.grp_b1ds = 0x00000030,
 	.grp_ddrpke = 0x00000000,
 	.grp_ddrmode = 0x00020000,
-#ifdef CONFIG_TARGET_MX6UL_9X9_EVK
-	.grp_ddr_type = 0x00080000,
-#else
 	.grp_ddr_type = 0x000c0000,
-#endif
 };
 
-#ifdef CONFIG_TARGET_MX6UL_9X9_EVK
-static struct mx6ul_iomux_ddr_regs mx6_ddr_ioregs = {
-	.dram_dqm0 = 0x00000030,
-	.dram_dqm1 = 0x00000030,
-	.dram_ras = 0x00000030,
-	.dram_cas = 0x00000030,
-	.dram_odt0 = 0x00000000,
-	.dram_odt1 = 0x00000000,
-	.dram_sdba2 = 0x00000000,
-	.dram_sdclk_0 = 0x00000030,
-	.dram_sdqs0 = 0x00003030,
-	.dram_sdqs1 = 0x00003030,
-	.dram_reset = 0x00000030,
-};
-
-static struct mx6_mmdc_calibration mx6_mmcd_calib = {
-	.p0_mpwldectrl0 = 0x00000000,
-	.p0_mpdgctrl0 = 0x20000000,
-	.p0_mprddlctl = 0x4040484f,
-	.p0_mpwrdlctl = 0x40405247,
-	.mpzqlp2ctl = 0x1b4700c7,
-};
-
-static struct mx6_lpddr2_cfg mem_ddr = {
-	.mem_speed = 800,
-	.density = 2,
-	.width = 16,
-	.banks = 4,
-	.rowaddr = 14,
-	.coladdr = 10,
-	.trcd_lp = 1500,
-	.trppb_lp = 1500,
-	.trpab_lp = 2000,
-	.trasmin = 4250,
-};
-
-struct mx6_ddr_sysinfo ddr_sysinfo = {
-	.dsize = 0,
-	.cs_density = 18,
-	.ncs = 1,
-	.cs1_mirror = 0,
-	.walat = 0,
-	.ralat = 5,
-	.mif3_mode = 3,
-	.bi_on = 1,
-	.rtt_wr = 0,        /* LPDDR2 does not need rtt_wr rtt_nom */
-	.rtt_nom = 0,
-	.sde_to_rst = 0,    /* LPDDR2 does not need this field */
-	.rst_to_cke = 0x10, /* JEDEC value for LPDDR2: 200us */
-	.ddr_type = DDR_TYPE_LPDDR2,
-	.refsel = 0,	/* Refresh cycles at 64KHz */
-	.refr = 3,	/* 4 refresh commands per refresh cycle */
-};
-
-#else
 static struct mx6ul_iomux_ddr_regs mx6_ddr_ioregs = {
 	.dram_dqm0 = 0x00000030,
 	.dram_dqm1 = 0x00000030,
@@ -822,7 +676,6 @@ static struct mx6_ddr3_cfg mem_ddr = {
 	.trcmin = 4875,
 	.trasmin = 3500,
 };
-#endif
 
 static void ccgr_init(void)
 {
