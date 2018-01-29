@@ -332,14 +332,6 @@ config TARGET_MX6UL_ENGICAM
 	select SPL_SEPARATE_BSS if SPL
 	select SPL_PINCTRL if SPL
 
-config TARGET_MX6UL_SWIFTCORE_EVK
-	bool "mx6ul_swiftcore_evk"
-	select BOARD_LATE_INIT
-	select MX6UL
-	select DM
-	select DM_THERMAL
-	select SUPPORT_SPL
-
 config TARGET_MX6ULL_14X14_EVK
 	bool "Support mx6ull_14x14_evk"
 	select BOARD_LATE_INIT
