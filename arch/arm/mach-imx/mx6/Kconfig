@@ -308,8 +308,9 @@ config TARGET_MX6UL_14X14_EVK
 	select SUPPORT_SPL
 
 config TARGET_MX6UL_SWIFTCORE_V1
-	select BOARD_LATE_INIT
 	bool "mx6ul_swiftcore_v1"
+	select BOARD_EARLY_INIT_F
+	select BOARD_LATE_INIT
 	select MX6UL
 	select DM
 	select DM_THERMAL
